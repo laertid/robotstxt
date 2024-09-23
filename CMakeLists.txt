@@ -15,8 +15,8 @@ LIST(GET VERSION_DIGITS 2 CPACK_PACKAGE_VERSION_PATCH)
 SET(CPACK_PACKAGE_NAME "robots")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Google's robots.txt parser and matcher C++ library")
 SET(CPACK_PACKAGE_VENDOR "Google Inc.")
-SET(CPACK_PACAKGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.md")
-SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
+SET(CPACK_PACAKGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_DESCRIPTION_SUMMARY} ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
@@ -50,7 +50,7 @@ SET(CPACK_SOURCE_IGNORE_FILES
 
 OPTION(ROBOTS_BUILD_STATIC "If ON, robots will build also the static library" ON)
 OPTION(ROBOTS_BUILD_TESTS "If ON, robots will build test targets" OFF)
-OPTION(ROBOTS_INSTALL "If ON, enable the installation of the targets" ON)
+OPTION(ROBOTS_INSTALL "If ON, enable the installation of the targets" OFF)
 
 ############ helper libs ############
 
@@ -60,33 +60,35 @@ INCLUDE(ExternalProject)
 
 ############ dependencies ##############
 
-CONFIGURE_FILE(CMakeLists.txt.in libs/CMakeLists.txt)
-EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . RESULT_VARIABLE result WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libs)
+find_package(absl REQUIRED)
 
-IF(result)
-    MESSAGE(FATAL_ERROR "Failed to download dependencies: ${result}")
-ENDIF()
+# CONFIGURE_FILE(CMakeLists.txt.in libs/CMakeLists.txt)
+# EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . RESULT_VARIABLE result WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libs)
 
-EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} --build . RESULT_VARIABLE result WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libs)
+# IF(result)
+#     MESSAGE(FATAL_ERROR "Failed to download dependencies: ${result}")
+# ENDIF()
 
-IF(result)
-    MESSAGE(FATAL_ERROR "Failed to download dependencies: ${result}")
-ENDIF()
+# EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} --build . RESULT_VARIABLE result WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libs)
 
-# abseil-cpp
-IF(MSVC)
-    # /wd4005  macro-redefinition
-    # /wd4068  unknown pragma
-    # /wd4244  conversion from 'type1' to 'type2'
-    # /wd4267  conversion from 'size_t' to 'type2'
-    # /wd4800  force value to bool 'true' or 'false' (performance warning)
-    ADD_COMPILE_OPTIONS(/wd4005 /wd4068 /wd4244 /wd4267 /wd4800)
-    ADD_DEFINITIONS(/DNOMINMAX /DWIN32_LEAN_AND_MEAN=1 /D_CRT_SECURE_NO_WARNINGS)
-ENDIF(MSVC)
+# IF(result)
+#     MESSAGE(FATAL_ERROR "Failed to download dependencies: ${result}")
+# ENDIF()
 
-ADD_SUBDIRECTORY(${CMAKE_CURRENT_BINARY_DIR}/libs/abseil-cpp-src
-                 ${CMAKE_CURRENT_BINARY_DIR}/libs/abseil-cpp-build
-                 EXCLUDE_FROM_ALL)
+# # abseil-cpp
+# IF(MSVC)
+#     # /wd4005  macro-redefinition
+#     # /wd4068  unknown pragma
+#     # /wd4244  conversion from 'type1' to 'type2'
+#     # /wd4267  conversion from 'size_t' to 'type2'
+#     # /wd4800  force value to bool 'true' or 'false' (performance warning)
+#     ADD_COMPILE_OPTIONS(/wd4005 /wd4068 /wd4244 /wd4267 /wd4800)
+#     ADD_DEFINITIONS(/DNOMINMAX /DWIN32_LEAN_AND_MEAN=1 /D_CRT_SECURE_NO_WARNINGS)
+# ENDIF(MSVC)
+
+# ADD_SUBDIRECTORY(${CMAKE_CURRENT_BINARY_DIR}/libs/abseil-cpp-src
+#                  ${CMAKE_CURRENT_BINARY_DIR}/libs/abseil-cpp-build
+#                  EXCLUDE_FROM_ALL)
 
 IF(ROBOTS_BUILD_TESTS)
     INCLUDE(CTest)
